@@ -1,21 +1,45 @@
-import * as React from "react"
+import { cn } from "@/lib/utils";
+import * as React from "react";
 
-import { cn } from "@/lib/utils"
+const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
+  ({ className, type, ...props }, ref) => {
+    return (
+      <input
+        ref={ref}
+        type={type}
+        data-slot="input"
+        className={cn(
+          // Base
+          "h-9 w-full rounded-md border bg-transparent px-3 py-1 text-base md:text-sm",
+          "min-w-0 outline-none shadow-xs transition-[color,box-shadow]",
 
-function Input({ className, type, ...props }: React.ComponentProps<"input">) {
-  return (
-    <input
-      type={type}
-      data-slot="input"
-      className={cn(
-        "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-        "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-        "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
-        className
-      )}
-      {...props}
-    />
-  )
-}
+          // Placeholder & file styling
+          "placeholder:text-muted-foreground file:text-foreground",
+          "file:bg-transparent file:border-0 file:h-7 file:text-sm file:font-medium",
 
-export { Input }
+          // Disabled
+          "disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed",
+
+          // Selection (text highlight)
+          "selection:bg-pink-500/40 selection:text-pink-900",
+
+          // Focus ring (romantic theme)
+          "focus-visible:border-pink-400 focus-visible:ring-[3px] focus-visible:ring-pink-400/50",
+
+          // Validation
+          "aria-invalid:border-red-500 aria-invalid:ring-red-400/40",
+
+          // Dark mode
+          "dark:bg-input/30 dark:border-input",
+
+          className
+        )}
+        {...props}
+      />
+    );
+  }
+);
+
+Input.displayName = "Input";
+
+export { Input };

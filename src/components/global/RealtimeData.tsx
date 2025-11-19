@@ -3,39 +3,48 @@
 import { useSocket } from "@/components/providers/SocketProvider";
 import { useCouple } from "@/hooks/useCouple";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 
 export default function RealtimeData() {
   const socket = useSocket();
   const { user } = useCouple();
   const queryClient = useQueryClient();
 
+  /* --------------------------------------------------
+     Stable listeners (avoid re-registration)
+  -------------------------------------------------- */
+
+  const handleRefreshMemories = useCallback(() => {
+    console.log("📸 New Photo Detected → Refreshing memories...");
+    queryClient.invalidateQueries({ queryKey: ["memories"] });
+  }, [queryClient]);
+
+  const handleRefreshDiary = useCallback(() => {
+    console.log("📔 New Diary Entry → Refreshing diary...");
+    queryClient.invalidateQueries({ queryKey: ["diary"] });
+  }, [queryClient]);
+
+  /* --------------------------------------------------
+     Attach socket listeners safely
+  -------------------------------------------------- */
   useEffect(() => {
-    if (!socket || !user?.coupleId) return;
+    if (!socket) return;
+    if (!user?.coupleId?._id) return;
 
-    // Ensure we are in the room
-    socket.emit("joinRoom", user.coupleId._id);
+    const roomId = String(user.coupleId._id);
 
-    // 1. Gallery Listener
-    const handleRefreshMemories = () => {
-      console.log("📸 New Photo Detected! Refreshing...");
-      queryClient.invalidateQueries({ queryKey: ["memories"] });
-    };
-
-    // 2. Diary Listener
-    const handleRefreshDiary = () => {
-      console.log("📔 New Diary Entry! Refreshing...");
-      queryClient.invalidateQueries({ queryKey: ["diary"] });
-    };
+    console.log("🔗 Joining updates room:", roomId);
+    socket.emit("joinRoom", roomId);
 
     socket.on("refreshMemories", handleRefreshMemories);
     socket.on("refreshDiary", handleRefreshDiary);
 
     return () => {
+      console.log("❌ Cleaning up realtime listeners...");
       socket.off("refreshMemories", handleRefreshMemories);
       socket.off("refreshDiary", handleRefreshDiary);
     };
-  }, [socket, user, queryClient]);
+  }, [socket, user?.coupleId?._id, handleRefreshMemories, handleRefreshDiary]);
 
-  return null; // Invisible component
+  return null;
 }
