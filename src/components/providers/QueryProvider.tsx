@@ -15,9 +15,10 @@ export default function QueryProvider({ children }: { children: ReactNode }) {
             refetchOnReconnect: true,
             refetchOnMount: false,
 
-            // Prevent excessive network calls
+            
+      // Prevent excessive network calls
             staleTime: 1000 * 60, // 1 minute
-            cacheTime: 1000 * 60 * 5, // 5 minutes
+            gcTime: 1000 * 60 * 5, // 5 minutes
 
             retry: 1, // Retry just once (clean UX)
           },
